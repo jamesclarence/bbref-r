@@ -9,16 +9,24 @@ library(tidyverse)
 library(rvest)
 library(janitor)
   
-# Function - One Year/One Team --------------------------------------------
-f <- function(t, s1) {
-  # 2021 game results
-  # https://www.basketball-reference.com/teams/CLE/2021/gamelog/
-  webpage <- paste0("https://www.basketball-reference.com/teams/", t,"/", s1, "/gamelog/")
-  t21_webpage <- read_html(webpage)
-  t21_table <- html_table(t21_webpage)
-  t21_df <- data.frame(t21_table) %>% 
+
+# Function - Get Team Game Log by Season ------------------------------------
+
+get_team_game_log_by_season <- function(team, season){
+  webpage <- paste0("https://www.basketball-reference.com/teams/", team,"/", season, "/gamelog/")
+  webpage_html <- read_html(webpage)
+  table_html <- html_table(webpage_html)
+  data.frame(table_html) %>% 
     row_to_names(row_number = 1) %>% 
-    clean_names()
+    clean_names() %>% 
+    filter(g != "G" & g != "")
+}
+
+
+# Function - One Year/One Team --------------------------------------------
+# https://www.basketball-reference.com/teams/CLE/2021/gamelog/
+f <- function(t, s1) {
+  t21_df <- get_team_game_log_by_season(t, s1)
   
   # New variable for point differential
   t21_chart <- t21_df %>% 
@@ -42,12 +50,7 @@ f <- function(t, s1) {
 f2 <- function(t, s1, s2) {
   # First Season s1
   # https://www.basketball-reference.com/teams/CLE/2021/gamelog/
-  webpage1 <- paste0("https://www.basketball-reference.com/teams/", t,"/", s1, "/gamelog/")
-  t1_webpage <- read_html(webpage1)
-  t1_table <- html_table(t1_webpage)
-  t1_df <- data.frame(t1_table) %>% 
-    row_to_names(row_number = 1) %>% 
-    clean_names()
+  t1_df <- get_team_game_log_by_season(t, s1)
   
   # New variable for point differential
   t1_chart <- t1_df %>% 
@@ -58,12 +61,7 @@ f2 <- function(t, s1, s2) {
   
   # Second Season s2
   # https://www.basketball-reference.com/teams/CLE/2022/gamelog/
-  webpage2 <- paste0("https://www.basketball-reference.com/teams/", t,"/", s2, "/gamelog/")
-  t2_webpage <- read_html(webpage2)
-  t2_table <- html_table(t2_webpage)
-  t2_df <- data.frame(t2_table) %>% 
-    row_to_names(row_number = 1) %>% 
-    clean_names()
+  t2_df <- get_team_game_log_by_season(t, s2)
   
   # New variable for point differential
   t2_chart <- t2_df %>% 
