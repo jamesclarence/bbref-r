@@ -18,19 +18,27 @@ get_team_game_log_by_season <- function(team, season){
   table_html <- html_table(webpage_html)
   data.frame(table_html) %>% 
     row_to_names(row_number = 1) %>% 
-    clean_names() %>% 
+    clean_names() %>%
+    remove_empty("cols") %>% 
+    rename_with(~ gsub("_2", "_opp", .x), ends_with("_2")) %>%
+    rename(home_away = x,
+           pt_opp = opp_opp,
+           pt_tm = tm) %>% 
+    mutate(home_away =if_else(home_away == "@", "away", "home")) %>% 
     filter(g != "G" & g != "")
 }
 
 
 # Function - One Year/One Team --------------------------------------------
-# https://www.basketball-reference.com/teams/CLE/2021/gamelog/
+# https://www.basketball-reference.com/teams/ATL/2021/gamelog/
+# f("ATL", 2021)
+
 f <- function(t, s1) {
   t21_df <- get_team_game_log_by_season(t, s1)
   
   # New variable for point differential
   t21_chart <- t21_df %>% 
-    mutate(pt_diff = as.numeric(tm)-as.numeric(opp_2)) %>% 
+    mutate(pt_diff = as.numeric(pt_tm)-as.numeric(pt_opp)) %>% 
     drop_na(pt_diff) %>% 
     mutate(pt_diff_cumsum = cumsum(pt_diff), g = as.integer(g), season = 2021) %>% 
     select(season, g, pt_diff, pt_diff_cumsum)
@@ -47,6 +55,8 @@ f <- function(t, s1) {
  
 
 # Function: One Team/Two Years --------------------------------------------
+# f("ATL", 2021, 2022)
+
 f2 <- function(t, s1, s2) {
   # First Season s1
   # https://www.basketball-reference.com/teams/CLE/2021/gamelog/
@@ -54,7 +64,7 @@ f2 <- function(t, s1, s2) {
   
   # New variable for point differential
   t1_chart <- t1_df %>% 
-    mutate(pt_diff = as.numeric(tm)-as.numeric(opp_2)) %>% 
+    mutate(pt_diff = as.numeric(pt_tm)-as.numeric(pt_opp)) %>% 
     drop_na(pt_diff) %>% 
     mutate(pt_diff_cumsum = cumsum(pt_diff), g = as.integer(g), season = s1) %>% 
     select(season, g, pt_diff, pt_diff_cumsum)
@@ -65,7 +75,7 @@ f2 <- function(t, s1, s2) {
   
   # New variable for point differential
   t2_chart <- t2_df %>% 
-    mutate(pt_diff = as.numeric(tm)-as.numeric(opp_2)) %>% 
+    mutate(pt_diff = as.numeric(pt_tm)-as.numeric(pt_opp)) %>% 
     drop_na(pt_diff) %>% 
     mutate(pt_diff_cumsum = cumsum(pt_diff), g = as.integer(g), season = s2) %>% 
     select(season, g, pt_diff, pt_diff_cumsum)
