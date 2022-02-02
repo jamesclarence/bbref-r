@@ -29,11 +29,11 @@ get_team_game_log_by_season <- function(team, season){
 }
 
 
-# Function - One Year/One Team --------------------------------------------
+# Function - Chart for One Year/One Team Cumulative Point Differential ---------
 # https://www.basketball-reference.com/teams/ATL/2021/gamelog/
 # f("ATL", 2021)
 
-f <- function(t, s1) {
+chart_pt_diff_one_year_one_team <- function(t, s1) {
   t21_df <- get_team_game_log_by_season(t, s1)
   
   # New variable for point differential
@@ -54,10 +54,10 @@ f <- function(t, s1) {
 }
  
 
-# Function: One Team/Two Years --------------------------------------------
+# Function: Chart for One Team/Two Years Cumulative Point Differential ---------
 # f("ATL", 2021, 2022)
 
-f2 <- function(t, s1, s2) {
+chart_pt_diff_two_years_one_team <- function(t, s1, s2) {
   # First Season s1
   # https://www.basketball-reference.com/teams/CLE/2021/gamelog/
   t1_df <- get_team_game_log_by_season(t, s1)
